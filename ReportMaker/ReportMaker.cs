@@ -1,5 +1,6 @@
 ﻿using System;
 using ClosedXML.Excel;
+using System.Reflection;
 
 namespace ReportMaker
 {
@@ -12,112 +13,45 @@ namespace ReportMaker
             {
                 records.Add(new recordDummy());
             }
-            MakeFile(records,"C:/Users/dan/source/repos/ReportMaker/ReportMaker/test.xlsx");
+            MakeFile(records, "C:/Users/Daniel/source/repos/ReportMaker/ReportMaker/test.xlsx");
         }
-        static public void MakeFile(List<recordDummy> records,String filePath)
+        static public void MakeFile(List<recordDummy> records, String filePath)
         {
             IXLWorkbook workbook = new XLWorkbook();
-            IXLWorksheet worksheet = workbook.Worksheets.Add("Sample sheet");
+            IXLWorksheet worksheet = workbook.Worksheets.Add("Data");
             worksheet.Style.Font.Bold = true;
 
             var columnTitles = worksheet.Range("A1:Y1");
             columnTitles.Style.Fill.BackgroundColor = XLColor.Gray;
             columnTitles.Style.Font.FontColor = XLColor.White;
-            worksheet.Cell(1, 1).Value = "Vehicle";//A
-            worksheet.Column("A").Width = 12;
 
-            worksheet.Cell(1, 2).Value = "Depot Name";//B
-            worksheet.Column("B").Width = 10;
-
-            worksheet.Cell(1, 3).Value = "Start Date";//C
-            worksheet.Column("C").Width = 20;
-
-            worksheet.Cell(1, 4).Value = "End Date";//D
-            worksheet.Column("D").Width = 20;
-
-            worksheet.Cell(1, 5).Value = "Veh Group Code";//E
-            worksheet.Column("E").Width = 20;
-
-            worksheet.Cell(1, 6).Value = "Drive Hours";//F
-            worksheet.Column("F").Width = 12;
-
-            worksheet.Cell(1, 7).Value = "Idle Hours";//G
-            worksheet.Column("G").Width = 12;
-
-            worksheet.Cell(1, 8).Value = "Fuel Used";//H
-            worksheet.Column("H").Width = 10;
-
-            worksheet.Cell(1, 9).Value = "Miles Per KWh";//I
-            worksheet.Column("I").Width = 10;
-
-            worksheet.Cell(1, 10).Value = "MPG";//J
-            worksheet.Column("J").Width = 10;
-
-            worksheet.Cell(1, 11).Value = "Route Count";//K
-            worksheet.Column("K").Width = 10;
-
-            worksheet.Cell(1, 12).Value = "Data Weeks";//L
-            worksheet.Column("L").Width = 10;
-
-            worksheet.Cell(1, 13).Value = "Average Monthly Mileage";//M
-            worksheet.Column("M").Width = 20;
-
-            worksheet.Cell(1, 14).Value = "Total Route Miles";//N
-            worksheet.Column("N").Width = 20;
-
-            worksheet.Cell(1, 15).Value = "Average Daily Mileage";//O
-            worksheet.Column("O").Width = 20;
-
-            worksheet.Cell(1, 16).Value = "No Of Days";//P
-            worksheet.Column("P").Width = 20;
-
-            worksheet.Cell(1, 17).Value = "No Of Work Days";//Q
-            worksheet.Column("Q").Width = 20;
-
-            worksheet.Cell(1, 18).Value = "Suitable for Electric";//R
-            worksheet.Column("R").Width = 20;
-
-            worksheet.Cell(1, 19).Value = "% of Battery Used in a Day";//S
-            worksheet.Column("S").Width = 25;
-
-            worksheet.Cell(1, 20).Value = "Level";//T
-            worksheet.Column("T").Width = 20;
-
-            worksheet.Cell(1, 21).Value = "Average EV Cost @ £0.196";//U
-            worksheet.Column("U").Width = 20;
-
-            worksheet.Cell(1, 22).Value = "Average Diesel Cost @ £1.69";//V
-            worksheet.Column("V").Width = 20;
-
-            worksheet.Cell(1, 23).Value = "Fuel Cost Savings";//W
-            worksheet.Column("W").Width = 20;
-
-            worksheet.Cell(1, 24).Value = "CO2 (kg)";//X
-            worksheet.Column("X").Width = 20;
-
-            int row = 2;
-            foreach(recordDummy record in records)
+            //set columns
+            string[] columns = { "Vehicle", "Depot Name", "Start Date", "End Date", "Veh Group Code", "Drive Hours", "Idle Hours",
+                "Fuel Used","Miles Per KWh","MPG","Route Count","Data Weeks","Average Monthly Mileage","Total Route Miles",
+                "Average Daily Mileage","No Of Days","No Of Work Days","Suitable for Electric","% of Battery Used in a Day",
+                "Level","Average EV Cost @ £0.196","Average Diesel Cost @ £1.69","Fuel Cost Savings","CO2 (kg)"};
+            for(int column = 0; column < columns.Length; column++)
             {
-                worksheet.Cell(row, 1).Value = record.VehicleRegistration;
-                worksheet.Cell(row, 1).Value = record.DepotName;
-                worksheet.Cell(row, 3).Value = record.StartDate;
-                worksheet.Cell(row, 4).Value = record.EndDate;
-                worksheet.Cell(row, 5).Value = record.VehicleGroupCode;
-                worksheet.Cell(row, 6).Value = record.DriveHours;
-                worksheet.Cell(row, 7).Value = record.IdleHours;
-                worksheet.Cell(row, 8).Value = record.FuelUsed;
-                worksheet.Cell(row, 9).Value = record.MilesPerKWh;
-                worksheet.Cell(row, 10).Value = record.MilesPerGallon;
-                worksheet.Cell(row, 11).Value = record.RouteCount;
-                worksheet.Cell(row, 12).Value = record.DataCapturedOver;
-                worksheet.Cell(row, 13).Value = record.AverageMonthlyMileage;
-                worksheet.Cell(row, 14).Value = record.TotalMileage;
-                worksheet.Cell(row, 15).Value = record.AverageDailyMileage;
-                worksheet.Cell(row, 16).Value = record.DaysCount;
-                worksheet.Cell(row, 17).Value = record.WorkingDaysCount;
+                worksheet.Cell(1, column+1).Value = columns[column];
+            }
 
-             
-                if(record.SuitableForEV == true)
+            decimal averageEVTotal = 0;
+            decimal averageDieselTotal = 0;
+            decimal fuelCostSavingsTotal = 0;
+            decimal CO2Total = 0;
+            int row = 2;
+            //each record
+            foreach (recordDummy record in records)
+            {
+                int cell = 1;
+                //each property
+                foreach (PropertyInfo prop in record.GetType().GetProperties()) { 
+                    worksheet.Cell(row, cell).Value = prop.GetValue(record);
+                    cell++;                 
+                    }
+
+                //color fill the bool
+                if (record.SuitableForEV == true)
                 {
                     worksheet.Cell(row, 18).Value = "Y";
                     worksheet.Cell(row, 18).Style.Fill.BackgroundColor = XLColor.Green;
@@ -128,10 +62,39 @@ namespace ReportMaker
                     worksheet.Cell(row, 18).Style.Fill.BackgroundColor = XLColor.Red;
                 }
 
-                worksheet.Cell(row, 19).Value = record.DailyBatteryUsagePercentage;//needs extra special formatting
+                //percentage bar the battery capacity
+                var batPerDay = worksheet.Range(1, 19, records.Count()+1,19);
+                batPerDay.AddConditionalFormat().DataBar(XLColor.Green,false).LowestValue().HighestValue();
+
+                //orange the level
+                worksheet.Cell(row, 20).Style.Fill.BackgroundColor = XLColor.Orange;
+                worksheet.Cell(row, 23).Style.Fill.BackgroundColor = XLColor.Orange;
+
+                //increment totals
+                averageEVTotal += record.TotalMileageCostEV;
+                averageDieselTotal += record.TotalMileageCostDerv;
+                fuelCostSavingsTotal += record.FuelCostSavings;
+                CO2Total += record.TotalMileageCO2Kg;
+
                 row++;
             }
-            workbook.SaveAs(filePath);  
+            row += 3;
+            worksheet.Cell(row, 20).Value = "Total:";
+            worksheet.Cell(row, 21).Value = averageEVTotal;
+            worksheet.Cell(row, 22).Value = averageDieselTotal;
+            worksheet.Cell(row, 23).Value = fuelCostSavingsTotal;
+            worksheet.Cell(row, 23).Value = CO2Total;
+
+
+            worksheet.Cell(1, 20).Style.Fill.BackgroundColor = XLColor.Orange;
+            worksheet.Rows().AdjustToContents(1);
+            worksheet.Columns().AdjustToContents(1);
+            worksheet.Column("C").Width = 20;
+            worksheet.Column("D").Width = 20;
+
+            workbook.SaveAs(filePath);
+            Environment.Exit(0);
         }
+       
     }
 }

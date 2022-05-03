@@ -22,11 +22,11 @@ namespace ReportMaker
         public TimeSpan DataCapturedOver { get; set; } = TimeSpan.FromHours(15);
         public decimal AverageMonthlyMileage { get; set; } = 5;
         public decimal TotalMileage { get; set; } = 4;
-        public decimal AverageDailyMileage { get; set; } = 3;
+        public double AverageDailyMileage { get; set; } = Math.Round(new Random().NextDouble()*100);
         public decimal DaysCount { get; set; } = 2;
         public decimal WorkingDaysCount { get; set; } = 1;
         public bool SuitableForEV { get; set; } = false;
-        public decimal DailyBatteryUsagePercentage { get; set; } = 0;
+        public double DailyBatteryUsagePercentage { get; set; } = Math.Round(new Random().NextDouble() * 100);
         public string BatteryLevelBanding { get; set; } = "BatteryLevelBanding";
         public decimal TotalMileageCostEV { get; set; } = -1;
         public decimal TotalMileageCostDerv { get; set; } = -2;
