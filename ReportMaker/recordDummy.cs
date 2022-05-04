@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReportMaker
 {
-    public class recordDummy 
+    public class RecordDummy 
     {
         public string VehicleRegistration { get; set; } = "VehicleRegistration";
         public string DepotName { get; set; } = "DepotName";

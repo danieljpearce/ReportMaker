@@ -1,28 +1,11 @@
-ï»¿using System;
+using System;
 using ClosedXML.Excel;
 using System.Reflection;
 
-namespace ReportMaker
-{
-    public class ReportMaker
+namespace ReportMaker { 
+    public class ReportGenerator
     {
-        static public void Main(String[] args)
-        {
-            //you need to change this 
-            var filePath = "C:/Users/dan/source/repos/ReportMaker/ReportMaker/test.xlsx";
-
-            //make some records up
-            List<RecordDummy> records = new List<RecordDummy>();
-            for(int i = 0; i < 35; i++)
-            {
-                records.Add(new RecordDummy());
-            }
-            IXLWorkbook workbook = MakeWorkbook(records);
-            workbook.SaveAs(filePath);
-            Environment.Exit(0);
-        }
-
-        static IXLWorkbook MakeWorkbook(List<RecordDummy> records)
+        IXLWorkbook MakeWorkbook(List<Record> records)
         {
             IXLWorkbook workbook = new XLWorkbook();
             IXLWorksheet worksheet = workbook.Worksheets.Add("Data");
@@ -37,9 +20,9 @@ namespace ReportMaker
 
             //set columns
             string[] columnNames = { "Vehicle", "Depot Name", "Start Date", "End Date", "Veh Group Code", "Drive Hours", "Idle Hours",
-                "Fuel Used","Miles Per KWh","MPG","Route Count","Data Weeks","Average Monthly Mileage","Total Route Miles",
-                "Average Daily Mileage","No Of Days","No Of Work Days","Suitable for Electric","% of Battery Used in a Day",
-                "Level","Average EV Cost @ Â£0.196","Average Diesel Cost @ Â£1.69","Fuel Cost Savings","CO2 (kg)"};
+                    "Fuel Used","Miles Per KWh","MPG","Route Count","Data Weeks","Average Monthly Mileage","Total Route Miles",
+                    "Average Daily Mileage","No Of Days","No Of Work Days","Suitable for Electric","% of Battery Used in a Day",
+                    "Level","Average EV Cost @ £0.196","Average Diesel Cost @ £1.69","Fuel Cost Savings","CO2 (kg)"};
             for (int column = 0; column < columnNames.Length; column++)
             {
                 worksheet.Cell(1, column + 1).Value = columnNames[column];
@@ -70,7 +53,7 @@ namespace ReportMaker
             //each record
             int row = 2;
             int cell = 1;
-            foreach (RecordDummy record in records)
+            foreach (Record record in records)
             {
                 cell = 1;
                 //each property
@@ -79,7 +62,7 @@ namespace ReportMaker
                     worksheet.Cell(row, cell).Value = prop.GetValue(record);
                     cell++;
                 }
-   
+
                 //color fill the bool
                 if (record.SuitableForEV == true)
                 {
@@ -97,17 +80,17 @@ namespace ReportMaker
                     sumOfSavings_N += record.FuelCostSavings;
                     sumOfCO2_N += record.TotalMileageCO2Kg;
                 }
-                
+
                 //orange the level
                 worksheet.Cell(row, 20).Style.Fill.BackgroundColor = XLColor.OrangePeel;
                 worksheet.Cell(row, 23).Style.Fill.BackgroundColor = XLColor.OrangePeel;
 
                 //increment level counts for summary
-                if(record.BatteryLevelBanding == "<50%")
+                if (record.BatteryLevelBanding == "<50%")
                 {
                     lessThan50++;
                 }
-                else if(record.BatteryLevelBanding == ">=51% and <65%")
+                else if (record.BatteryLevelBanding == ">=51% and <65%")
                 {
                     fiftyOneToSixtyFive++;
                 }
@@ -139,14 +122,14 @@ namespace ReportMaker
             var CO2 = worksheet.Range(1, 24, records.Count + 1, 24);
 
             //add autofilter
-            worksheet.Range(1, 1, row, cell-1).SetAutoFilter();
+            worksheet.Range(1, 1, row, cell - 1).SetAutoFilter();
 
             //centre align the suitable for electric
             suitForElectric.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
             //percentage bar the battery capacity
             batteryUsageDaily.AddConditionalFormat().DataBar(XLColor.Green, XLColor.Green, false).LowestValue().HighestValue();
-            
+
             //Cells with totals 
             row += 2;
             worksheet.Cell(row, 20).Value = "Total:";
@@ -246,13 +229,13 @@ namespace ReportMaker
 
             summary.Rows().AdjustToContents();
             summary.Columns().AdjustToContents();
-            foreach(IXLCell formattableCell in formattableCells)
+            foreach (IXLCell formattableCell in formattableCells)
             {
                 formattableCell.Style.Fill.BackgroundColor = XLColor.LightSkyBlue;
                 formattableCell.Style.Font.Bold = true;
             }
             return workbook;
         }
-       
+
     }
 }
